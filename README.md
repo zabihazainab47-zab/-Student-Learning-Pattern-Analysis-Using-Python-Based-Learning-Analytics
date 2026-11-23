@@ -12,7 +12,7 @@
 
 **Student Learning Pattern Analysis** is an educational analytics and decision-support platform designed to analyze university students' mid-semester academic performance.
 
-Originally developed as an undergraduate Final Year Project (FYP), this application has been reframed to align with the **Erasmus Mundus Artificial Intelligence and Sustainable Societies (AISS)** programme, demonstrating competencies in responsible educational data engineering, human-centred AI evaluation, and accessible interface design.
+Originally developed as an undergraduate Final Year Project (FYP)
 
 ### Guiding Research Question
 > *"How can educational analytics help instructors understand student learning patterns and identify opportunities for timely academic support without reducing students to predictive labels?"*
