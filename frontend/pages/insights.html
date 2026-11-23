@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support Insights — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">PA</div>
+        <div>
+          <div class="brand-title">Student Learning Pattern Analysis</div>
+          <div class="brand-sub">Educational Analytics</div>
+        </div>
+      </div>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div>
+          <div class="user-info-name" id="user-display-name">User</div>
+          <div class="user-info-role" id="user-role-label">ROLE</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/static/dashboards/teacher.html" class="nav-link">Dashboard</a>
+        <a href="/static/pages/students.html" class="nav-link">Student Records</a>
+        <a href="/static/pages/assessments.html" class="nav-link">Marks Assessment</a>
+        <a href="/static/pages/insights.html" class="nav-link active">Support Insights</a>
+        <a href="/static/pages/data-management.html" class="nav-link">Data & CSV Export</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="Auth.logout()">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Evidence-Based Academic Support Insights</h1>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <div class="alert alert-info" style="margin-bottom:0;">
+          <div>
+            <strong>Human-Centred Analytics Principle:</strong> Insights identify data anomalies, incomplete records, and component divergence to guide instructor intervention. Algorithmic outputs are non-deterministic observations, not definitive judgements.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label for="insights-class-select" class="form-label" style="margin-bottom:0;">Select Class:</label>
+              <select id="insights-class-select" class="form-control" style="width:auto;"></select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filter-insight-type" class="form-label" style="margin-bottom:0;">Insight Category:</label>
+              <select id="filter-insight-type" class="form-control" style="width:auto;">
+                <option value="all">All Support Categories</option>
+                <option value="Completeness">Incomplete Assessment Records</option>
+                <option value="Overall">Total Marks Below 50%</option>
+                <option value="Divergence">Component Divergence</option>
+                <option value="Attendance">Attendance Concerns</option>
+              </select>
+              <span class="badge badge-warning" id="insights-total-badge">—</span>
+            </div>
+          </div>
+
+          <div id="insights-cards-container" style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+            <p>Loading support insights...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/insights.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Insights.init();
+    });
+  </script>
+</body>
+</html>

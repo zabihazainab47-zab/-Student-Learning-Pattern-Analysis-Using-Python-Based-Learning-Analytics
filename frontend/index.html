@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body style="display: flex; align-items: center; justify-content: center; height: 100vh;">
+  <div style="text-align: center;">
+    <h2>Student Learning Pattern Analysis</h2>
+    <p style="margin-top: 8px;">Loading portal environment...</p>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    const user = Api.getUser();
+    const token = Api.getToken();
+    if (token && user) {
+      Auth.redirectToDashboard(user.role);
+    } else {
+      window.location.href = '/static/login.html';
+    }
+  </script>
+</body>
+</html>

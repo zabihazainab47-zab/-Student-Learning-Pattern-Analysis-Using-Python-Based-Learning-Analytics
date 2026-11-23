@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Academic Progress — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Student Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">PA</div>
+        <div>
+          <div class="brand-title">Student Learning Pattern Analysis</div>
+          <div class="brand-sub">Student Portal</div>
+        </div>
+      </div>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar" style="background-color: var(--color-success);">S</div>
+        <div>
+          <div class="user-info-name" id="user-display-name">Student Name</div>
+          <div class="user-info-role" id="user-role-label">STUDENT</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/static/dashboards/student.html" class="nav-link active">My Academic Progress</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="Auth.logout()">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">My Mid-Semester Academic Performance</h1>
+        </div>
+        <div class="topbar-right">
+          <span class="badge badge-info" id="student-class-badge">—</span>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- Banner / Profile Card -->
+        <div class="card" style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <h2 id="profile-student-name" style="font-size: 20px;">—</h2>
+              <p style="margin-top: 4px;">Student ID: <strong id="profile-student-id">—</strong> | Class: <span id="profile-class-details">—</span></p>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Total Mid-Semester Score</div>
+              <div id="profile-total-score" style="font-size: 32px; font-weight: 800; color: var(--color-primary); line-height: 1.1;">—</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Maximum Total: 40.0 Marks</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Assessment Component Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Midterm Exam</span>
+              <span class="stat-icon" style="background:#eff6ff; color:#1e3a8a;"></span>
+            </div>
+            <div class="stat-value" id="card-midterm-marks">—</div>
+            <div class="stat-desc">Maximum 30.0 marks</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Assignment</span>
+              <span class="stat-icon" style="background:#ecfdf5; color:#059669;"></span>
+            </div>
+            <div class="stat-value" id="card-assignment-marks">—</div>
+            <div class="stat-desc">Maximum 3.0 marks</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Presentation</span>
+              <span class="stat-icon" style="background:#f0f9ff; color:#0284c7;"></span>
+            </div>
+            <div class="stat-value" id="card-presentation-marks">—</div>
+            <div class="stat-desc">Maximum 3.0 marks</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Attendance</span>
+              <span class="stat-icon" style="background:#fef2f2; color:#dc2626;"></span>
+            </div>
+            <div class="stat-value" id="card-attendance-marks">—</div>
+            <div class="stat-desc">Marks out of 4.0 (not %)</div>
+          </div>
+        </div>
+
+        <!-- Breakdown Chart & Observations Grid -->
+        <div class="charts-grid">
+          <!-- Chart -->
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Assessment Breakdown</h3>
+                <div class="card-subtitle">Your score as percentage of each component maximum</div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="student-breakdown-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Evidence-based Feedback Observations -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Progress Observations & Feedback</h3>
+                <div class="card-subtitle">Personalized feedback derived strictly from recorded assessment data</div>
+              </div>
+            </div>
+            <div id="observations-list" style="display: flex; flex-direction: column; gap: 10px;">
+              <p>Loading observations...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    let studentChart = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = Auth.checkAuth(['student']);
+      if (!user) return;
+
+      try {
+        const data = await Api.get(`/api/dashboard/student/${user.student_id}/progress`);
+        renderStudentDashboard(data);
+      } catch (err) {
+        console.error('Failed to load student progress:', err);
+      }
+    });
+
+    function renderStudentDashboard(data) {
+      const p = data.student_profile;
+      const a = data.assessment;
+
+      document.getElementById('profile-student-name').textContent = p.student_name;
+      document.getElementById('profile-student-id').textContent = p.student_id;
+      document.getElementById('profile-class-details').textContent = `${p.class_name} - ${p.section} (${p.academic_session})`;
+      document.getElementById('student-class-badge').textContent = `${p.class_name} ${p.section}`;
+
+      // Score Total
+      const totalEl = document.getElementById('profile-total-score');
+      if (a.total_marks !== null) {
+        totalEl.textContent = `${a.total_marks} / 40.0`;
+      } else {
+        totalEl.innerHTML = '<span class="badge badge-warning" style="font-size:16px;">Incomplete Record</span>';
+      }
+
+      // Component Cards
+      document.getElementById('card-midterm-marks').textContent = 
+        a.midterm_marks !== null ? `${a.midterm_marks} / 30.0` : 'Missing';
+      document.getElementById('card-assignment-marks').textContent = 
+        a.assignment_marks !== null ? `${a.assignment_marks} / 3.0` : 'Missing';
+      document.getElementById('card-presentation-marks').textContent = 
+        a.presentation_marks !== null ? `${a.presentation_marks} / 3.0` : 'Missing';
+      document.getElementById('card-attendance-marks').textContent = 
+        a.attendance_marks !== null ? `${a.attendance_marks} / 4.0` : 'Missing';
+
+      // Render Breakdown Chart
+      const ctx = document.getElementById('student-breakdown-chart');
+      if (ctx) {
+        if (studentChart) studentChart.destroy();
+        studentChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Midterm (30)', 'Assignment (3)', 'Presentation (3)', 'Attendance (4)'],
+            datasets: [{
+              label: 'Your Score (% of Component Max)',
+              data: [
+                a.midterm_marks !== null ? (a.midterm_marks / 30 * 100).toFixed(1) : 0,
+                a.assignment_marks !== null ? (a.assignment_marks / 3 * 100).toFixed(1) : 0,
+                a.presentation_marks !== null ? (a.presentation_marks / 3 * 100).toFixed(1) : 0,
+                a.attendance_marks !== null ? (a.attendance_marks / 4 * 100).toFixed(1) : 0,
+              ],
+              backgroundColor: ['#1e3a8a', '#059669', '#0284c7', '#d97706'],
+              borderRadius: 4,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { callback: v => `${v}%` },
+                title: { display: true, text: 'Percentage Achieved' }
+              }
+            }
+          }
+        });
+      }
+
+      // Render Observations
+      const obsList = document.getElementById('observations-list');
+      if (obsList) {
+        if (data.observations && data.observations.length > 0) {
+          obsList.innerHTML = data.observations.map(obs => `
+            <div class="alert alert-info" style="margin-bottom:0;">
+              <div>${obs}</div>
+            </div>
+          `).join('');
+        } else {
+          obsList.innerHTML = '<p>No specific remarks at this time. Maintain consistent engagement.</p>';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

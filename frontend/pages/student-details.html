@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile & Performance — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">PA</div>
+        <div>
+          <div class="brand-title">Student Learning Pattern Analysis</div>
+          <div class="brand-sub">Educational Analytics</div>
+        </div>
+      </div>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div>
+          <div class="user-info-name" id="user-display-name">User</div>
+          <div class="user-info-role" id="user-role-label">ROLE</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/static/dashboards/teacher.html" class="nav-link">Dashboard</a>
+        <a href="/static/pages/students.html" class="nav-link active">Student Records</a>
+        <a href="/static/pages/assessments.html" class="nav-link">Marks Assessment</a>
+        <a href="/static/pages/insights.html" class="nav-link">Support Insights</a>
+        <a href="/static/pages/data-management.html" class="nav-link">Data & CSV Export</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="Auth.logout()">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <a href="/static/pages/students.html" class="btn btn-outline btn-sm">← Back to Student Directory</a>
+          <h1 class="page-title" style="margin-left: 12px;">Individual Academic Profile</h1>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- Student Identity Header -->
+        <div class="card" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <h2 id="det-student-name" style="font-size: 22px;">—</h2>
+              <div style="margin-top: 6px; color: var(--text-secondary); font-size: 13px;">
+                Student ID: <strong id="det-student-id">—</strong> | Class: <span id="det-class-details">—</span>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span class="stat-label">Calculated Mid-Semester Total</span>
+              <div id="det-total-marks" style="font-size: 32px; font-weight: 800; color: var(--color-primary); line-height: 1.1;">—</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Maximum Total: 40.0 Marks</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Component Score Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Midterm Exam</span>
+              <span class="stat-icon" style="background:#eff6ff; color:#1e3a8a;"></span>
+            </div>
+            <div class="stat-value" id="det-midterm">—</div>
+            <div class="stat-desc">Range: 0.0 – 30.0</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Assignment</span>
+              <span class="stat-icon" style="background:#ecfdf5; color:#059669;"></span>
+            </div>
+            <div class="stat-value" id="det-assignment">—</div>
+            <div class="stat-desc">Range: 0.0 – 3.0</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Presentation</span>
+              <span class="stat-icon" style="background:#f0f9ff; color:#0284c7;"></span>
+            </div>
+            <div class="stat-value" id="det-presentation">—</div>
+            <div class="stat-desc">Range: 0.0 – 3.0</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Attendance</span>
+              <span class="stat-icon" style="background:#fef2f2; color:#dc2626;"></span>
+            </div>
+            <div class="stat-value" id="det-attendance">—</div>
+            <div class="stat-desc">Marks out of 4.0 (NOT %)</div>
+          </div>
+        </div>
+
+        <!-- Chart & Observations -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Component-Wise Visual Breakdown</h3>
+                <div class="card-subtitle">Student achievement percentage across mid-semester components</div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="det-breakdown-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Evidence-Based Observations</h3>
+                <div class="card-subtitle">Non-predictive observations traceable strictly to assessment records</div>
+              </div>
+            </div>
+            <div id="det-observations-container" style="display:flex; flex-direction:column; gap:10px;">
+              <p>Loading observations...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    let detailsChart = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = Auth.checkAuth(['administrator', 'teacher', 'student']);
+      if (!user) return;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const studentId = urlParams.get('id') || user.student_id;
+
+      if (!studentId) {
+        alert('Student ID not specified in request.');
+        window.location.href = '/static/pages/students.html';
+        return;
+      }
+
+      try {
+        const data = await Api.get(`/api/dashboard/student/${studentId}/progress`);
+        renderDetails(data);
+      } catch (err) {
+        console.error('Failed to load student progress:', err);
+      }
+    });
+
+    function renderDetails(data) {
+      const p = data.student_profile;
+      const a = data.assessment;
+
+      document.getElementById('det-student-name').textContent = p.student_name;
+      document.getElementById('det-student-id').textContent = p.student_id;
+      document.getElementById('det-class-details').textContent = `${p.class_name} - ${p.section} (${p.academic_session})`;
+
+      const totalEl = document.getElementById('det-total-marks');
+      if (a.total_marks !== null) {
+        totalEl.textContent = `${a.total_marks} / 40.0`;
+      } else {
+        totalEl.innerHTML = '<span class="badge badge-warning" style="font-size:16px;">Incomplete Record</span>';
+      }
+
+      document.getElementById('det-midterm').textContent = a.midterm_marks !== null ? `${a.midterm_marks} / 30.0` : 'Missing';
+      document.getElementById('det-assignment').textContent = a.assignment_marks !== null ? `${a.assignment_marks} / 3.0` : 'Missing';
+      document.getElementById('det-presentation').textContent = a.presentation_marks !== null ? `${a.presentation_marks} / 3.0` : 'Missing';
+      document.getElementById('det-attendance').textContent = a.attendance_marks !== null ? `${a.attendance_marks} / 4.0` : 'Missing';
+
+      // Render chart
+      const ctx = document.getElementById('det-breakdown-chart');
+      if (ctx) {
+        if (detailsChart) detailsChart.destroy();
+        detailsChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Midterm (30)', 'Assignment (3)', 'Presentation (3)', 'Attendance (4)'],
+            datasets: [{
+              label: 'Percentage of Maximum Achieved',
+              data: [
+                a.midterm_marks !== null ? (a.midterm_marks / 30 * 100).toFixed(1) : 0,
+                a.assignment_marks !== null ? (a.assignment_marks / 3 * 100).toFixed(1) : 0,
+                a.presentation_marks !== null ? (a.presentation_marks / 3 * 100).toFixed(1) : 0,
+                a.attendance_marks !== null ? (a.attendance_marks / 4 * 100).toFixed(1) : 0,
+              ],
+              backgroundColor: ['#1e3a8a', '#059669', '#0284c7', '#d97706'],
+              borderRadius: 4,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { callback: v => `${v}%` },
+                title: { display: true, text: 'Percentage Achieved' }
+              }
+            }
+          }
+        });
+      }
+
+      // Render observations
+      const obsContainer = document.getElementById('det-observations-container');
+      if (obsContainer) {
+        if (data.observations && data.observations.length > 0) {
+          obsContainer.innerHTML = data.observations.map(obs => `
+            <div class="alert alert-info" style="margin-bottom:0;">
+              <div>${obs}</div>
+            </div>
+          `).join('');
+        } else {
+          obsContainer.innerHTML = '<p>No specific remarks at this time. Assessment marks are consistent.</p>';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

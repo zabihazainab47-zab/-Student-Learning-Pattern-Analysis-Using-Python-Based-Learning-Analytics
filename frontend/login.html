@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 20px;
+    }
+    .login-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: var(--shadow-lg);
+    }
+    .brand-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .brand-badge {
+      display: inline-block;
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .quick-login-section {
+      margin-bottom: 20px;
+      padding: 12px;
+      background-color: var(--color-primary-light);
+      border: 1px dashed var(--color-primary);
+      border-radius: var(--radius-md);
+    }
+    .quick-login-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .quick-buttons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .btn-quick {
+      padding: 6px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn-quick:hover {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+    .credentials-card {
+      margin-top: 20px;
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="brand-header">
+        <h2>Student Learning Pattern Analysis</h2>
+        <p style="font-size: 13px; margin-top: 4px;">Human-Centred Mid-Semester Educational Analytics</p>
+      </div>
+
+      <!-- Quick 1-Click Evaluation Logins -->
+      <div class="quick-login-section">
+        <div class="quick-login-title">
+          <span>Instant 1-Click Evaluation Logins</span>
+          <span style="font-size: 10px; font-weight: normal; opacity: 0.8;">Click to test</span>
+        </div>
+        <div class="quick-buttons-grid">
+          <button type="button" class="btn-quick" onclick="quickFill('admin', 'admin123')">
+            Administrator
+          </button>
+          <button type="button" class="btn-quick" onclick="quickFill('teacher1', 'teach123')">
+            Teacher 1 (Dr. Mustafa)
+          </button>
+          <button type="button" class="btn-quick" onclick="quickFill('teacher2', 'teach456')">
+            Teacher 2 (Ms. Samra)
+          </button>
+          <button type="button" class="btn-quick" onclick="quickFill('FA22-BIT-A-001', 'student123')">
+            Student (Ahmad)
+          </button>
+        </div>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="username">Username or Student ID</label>
+          <input type="text" id="username" class="form-control" placeholder="e.g. admin, teacher1, or FA22-BIT-A-001" required autofocus>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" id="btn-login" class="btn btn-primary" style="width: 100%; padding: 10px;">
+          Sign In to Portal
+        </button>
+      </form>
+
+      <div class="credentials-card">
+        <strong style="display:block; margin-bottom: 4px; color:var(--text-main);">Database Accounts Overview (96 Total):</strong>
+        <div>• <strong>Administrator:</strong> <code>admin</code> / <code>admin123</code> (System configuration & teachers)</div>
+        <div>• <strong>Teacher 1:</strong> <code>teacher1</code> / <code>teach123</code> (Assigned to BSIT-A & BSCS-A)</div>
+        <div>• <strong>Teacher 2:</strong> <code>teacher2</code> / <code>teach456</code> (Assigned to BSIT-B)</div>
+        <div>• <strong>Students (93 accounts):</strong> <code>FA22-BIT-A-001</code> to <code>030</code>, <code>FA22-BIT-B-001</code> to <code>030</code>, <code>FA22-BCS-A-001</code> to <code>030</code> / Password: <code>student123</code></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    function quickFill(user, pass) {
+      document.getElementById('username').value = user;
+      document.getElementById('password').value = pass;
+      document.getElementById('login-form').dispatchEvent(new Event('submit'));
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const btn = document.getElementById('btn-login');
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      try {
+        const res = await Api.post('/api/auth/login', { username, password });
+        Api.setSession(res.access_token, res);
+        Api.showToast(`Welcome, ${res.display_name}!`, 'success');
+        setTimeout(() => {
+          Auth.redirectToDashboard(res.role);
+        }, 400);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Sign In to Portal';
+      }
+    });
+  </script>
+</body>
+</html>

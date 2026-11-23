@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marks Assessment — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">PA</div>
+        <div>
+          <div class="brand-title">Student Learning Pattern Analysis</div>
+          <div class="brand-sub">Educational Analytics</div>
+        </div>
+      </div>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div>
+          <div class="user-info-name" id="user-display-name">User</div>
+          <div class="user-info-role" id="user-role-label">ROLE</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/static/dashboards/teacher.html" class="nav-link">Dashboard</a>
+        <a href="/static/pages/students.html" class="nav-link">Student Records</a>
+        <a href="/static/pages/assessments.html" class="nav-link active">Marks Assessment</a>
+        <a href="/static/pages/insights.html" class="nav-link">Support Insights</a>
+        <a href="/static/pages/data-management.html" class="nav-link">Data & CSV Export</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="Auth.logout()">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Mid-Semester Marks Entry & Assessment</h1>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <div class="alert alert-info" style="margin-bottom:0;">
+          <div>
+            <strong>Assessment Rules:</strong> Midterm (0–30), Assignment (0–3), Presentation (0–3), Attendance (0–4 marks, NOT percentage).
+            Total is calculated out of 40. Missing marks must be left blank.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label for="assessment-class-select" class="form-label" style="margin-bottom:0;">Select Class:</label>
+              <select id="assessment-class-select" class="form-control" style="width:auto;"></select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filter-completeness" class="form-label" style="margin-bottom:0;">Filter Records:</label>
+              <select id="filter-completeness" class="form-control" style="width:auto;">
+                <option value="all">All Records</option>
+                <option value="incomplete">Incomplete Only (Missing marks)</option>
+                <option value="complete">Complete Only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Student Name</th>
+                  <th>Midterm (0–30)</th>
+                  <th>Assignment (0–3)</th>
+                  <th>Presentation (0–3)</th>
+                  <th>Attendance (0–4)</th>
+                  <th>Total (40)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="assessments-table-body">
+                <tr><td colspan="8">Loading assessment data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/assessments.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Assessments.init();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class & Section Management — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">PA</div>
+        <div>
+          <div class="brand-title">Student Learning Pattern Analysis</div>
+          <div class="brand-sub">Administration Console</div>
+        </div>
+      </div>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar" style="background-color: #7c3aed;">A</div>
+        <div>
+          <div class="user-info-name" id="user-display-name">Administrator</div>
+          <div class="user-info-role" id="user-role-label">ADMINISTRATOR</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/static/dashboards/admin.html" class="nav-link">System Overview</a>
+        <a href="/static/pages/students.html" class="nav-link">Student Records</a>
+        <a href="/static/pages/classes.html" class="nav-link active">Class & Section Setup</a>
+        <a href="/static/pages/assessments.html" class="nav-link">Academic Assessments</a>
+        <a href="/static/pages/insights.html" class="nav-link">Support Insights</a>
+        <a href="/static/pages/data-management.html" class="nav-link">CSV Import / Export</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="Auth.logout()">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Classes, Sections & Academic Sessions</h1>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-primary btn-sm" onclick="openClassModal()">+ Add New Class</button>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Class ID</th>
+                  <th>Degree / Class Name</th>
+                  <th>Section</th>
+                  <th>Academic Session</th>
+                  <th>Enrolled Students</th>
+                </tr>
+              </thead>
+              <tbody id="classes-table-body">
+                <tr><td colspan="5">Loading classes...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Class Modal -->
+  <div id="create-class-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:100;">
+    <div class="card" style="width:100%; max-width:420px; box-shadow:var(--shadow-lg);">
+      <div class="card-header">
+        <h3 class="card-title">Add Academic Class</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeClassModal()"></button>
+      </div>
+      <form id="create-class-form">
+        <div class="form-group">
+          <label class="form-label" for="cls-name">Class / Degree Name</label>
+          <input type="text" id="cls-name" class="form-control" placeholder="e.g. BSIT or BSCS" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cls-sec">Section</label>
+          <input type="text" id="cls-sec" class="form-control" placeholder="e.g. Section A or Section B" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cls-sess">Academic Session</label>
+          <input type="text" id="cls-sess" class="form-control" value="2025-2026" required>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button type="button" class="btn btn-outline" onclick="closeClassModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Class</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = Auth.checkAuth(['administrator']);
+      if (!user) return;
+
+      await loadClasses();
+    });
+
+    async function loadClasses() {
+      try {
+        const classes = await Api.get('/api/classes');
+        const tbody = document.getElementById('classes-table-body');
+        if (classes.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5">No classes configured.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = classes.map(c => `
+          <tr>
+            <td><code>#${c.id}</code></td>
+            <td><strong>${c.class_name}</strong></td>
+            <td>${c.section}</td>
+            <td>${c.academic_session}</td>
+            <td><span class="badge badge-info">${c.student_count || 0} Students</span></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load classes:', err);
+      }
+    }
+
+    function openClassModal() { document.getElementById('create-class-modal').style.display = 'flex'; }
+    function closeClassModal() {
+      document.getElementById('create-class-modal').style.display = 'none';
+      document.getElementById('create-class-form').reset();
+    }
+
+    document.getElementById('create-class-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('cls-name').value.trim();
+      const sec = document.getElementById('cls-sec').value.trim();
+      const sess = document.getElementById('cls-sess').value.trim();
+
+      try {
+        await Api.post('/api/classes', { class_name: name, section: sec, academic_session: sess });
+        Api.showToast(`Class '${name} - ${sec}' created.`, 'success');
+        closeClassModal();
+        await loadClasses();
+      } catch (err) {
+        // Handled by Api
+      }
+    });
+  </script>
+</body>
+</html>

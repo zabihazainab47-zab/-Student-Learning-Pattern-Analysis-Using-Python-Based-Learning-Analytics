@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Management & CSV — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">PA</div>
+        <div>
+          <div class="brand-title">Student Learning Pattern Analysis</div>
+          <div class="brand-sub">Educational Analytics</div>
+        </div>
+      </div>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div>
+          <div class="user-info-name" id="user-display-name">User</div>
+          <div class="user-info-role" id="user-role-label">ROLE</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/static/dashboards/teacher.html" class="nav-link">Dashboard</a>
+        <a href="/static/pages/students.html" class="nav-link">Student Records</a>
+        <a href="/static/pages/assessments.html" class="nav-link">Marks Assessment</a>
+        <a href="/static/pages/insights.html" class="nav-link">Support Insights</a>
+        <a href="/static/pages/data-management.html" class="nav-link active">Data & CSV Export</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="Auth.logout()">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Data Management: CSV Import & Export</h1>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <div class="charts-grid">
+          <!-- CSV Import Card -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Import Assessment Records via CSV</h2>
+                <div class="card-subtitle">Upload spreadsheet matching standard mid-semester columns</div>
+              </div>
+            </div>
+
+            <div class="alert alert-info">
+              <div>
+                <strong>Required CSV Format:</strong><br>
+                <code>student_id,student_name,class,section,midterm,assignment,presentation,attendance</code>
+              </div>
+            </div>
+
+            <form id="csv-upload-form">
+              <div class="form-group">
+                <label class="form-label" for="csv-file-input">Select CSV File</label>
+                <input type="file" id="csv-file-input" class="form-control" accept=".csv" required>
+              </div>
+
+              <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="csv-overwrite-checkbox">
+                <label for="csv-overwrite-checkbox" style="font-size:13px; color:var(--text-secondary); cursor:pointer;">
+                  Update marks if student ID already exists (overwrite)
+                </label>
+              </div>
+
+              <button type="submit" id="btn-submit-import" class="btn btn-primary" style="width:100%;">
+                Upload and Validate CSV
+              </button>
+            </form>
+
+            <!-- Detailed Import Report Box -->
+            <div id="import-report-container" style="display:none; margin-top:20px; border-top:1px solid var(--border-color); padding-top:16px;">
+              <h4 style="margin-bottom:8px;">Import Processing Summary</h4>
+              <div style="display:flex; gap:12px; margin-bottom:12px;">
+                <span class="badge badge-info">Processed: <span id="report-total-rows">0</span></span>
+                <span class="badge badge-success">Imported: <span id="report-imported-count">0</span></span>
+                <span class="badge badge-warning">Skipped: <span id="report-skipped-count">0</span></span>
+              </div>
+
+              <div id="report-errors-section" style="display:none;">
+                <div class="alert alert-danger" style="margin-bottom:6px; font-size:12px;">
+                  <strong>Validation Issues / Skipped Rows:</strong>
+                </div>
+                <ul id="report-error-list" style="font-size:12px; color:var(--color-danger); max-height:160px; overflow-y:auto; padding-left:20px;"></ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- CSV Export Card -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Export Academic Records</h2>
+                <div class="card-subtitle">Download CSV matching permitted class permissions</div>
+              </div>
+            </div>
+
+            <p style="margin-bottom:20px; font-size:13px; line-height:1.5;">
+              Export assessment marks for offline analysis or departmental records.
+              In accordance with security requirements, authentication passwords, tokens, and sensitive student metadata are strictly excluded from all CSV downloads.
+            </p>
+
+            <button id="btn-export-csv" class="btn btn-primary" style="width:100%; padding:12px;">
+               Download Assessment CSV Export
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/data-management.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      DataManagement.init();
+    });
+  </script>
+</body>
+</html>

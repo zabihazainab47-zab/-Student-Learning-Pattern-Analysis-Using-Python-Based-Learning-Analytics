@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">PA</div>
+        <div>
+          <div class="brand-title">Student Learning Pattern Analysis</div>
+          <div class="brand-sub">Educational Analytics</div>
+        </div>
+      </div>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar">T</div>
+        <div>
+          <div class="user-info-name" id="user-display-name">Instructor</div>
+          <div class="user-info-role" id="user-role-label">TEACHER</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/static/dashboards/teacher.html" class="nav-link active">Teacher Dashboard</a>
+        <a href="/static/pages/students.html" class="nav-link">Student Records</a>
+        <a href="/static/pages/assessments.html" class="nav-link">Marks Assessment</a>
+        <a href="/static/pages/insights.html" class="nav-link">Support Insights</a>
+        <a href="/static/pages/data-management.html" class="nav-link">Data & CSV Export</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="Auth.logout()">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Class Analytics & Performance</h1>
+        </div>
+        <div class="topbar-right">
+          <label for="class-selector" class="form-label" style="margin-bottom:0; margin-right:8px;">Assigned Class:</label>
+          <select id="class-selector" class="form-control" style="width: auto; font-size: 13px;"></select>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Total Enrolled</span>
+              <span class="stat-icon" style="background:#eff6ff; color:#1e3a8a;"></span>
+            </div>
+            <div class="stat-value" id="stat-total-enrolled">—</div>
+            <div class="stat-desc">Students in assigned class</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Mid-Semester Average</span>
+              <span class="stat-icon" style="background:#ecfdf5; color:#059669;"></span>
+            </div>
+            <div class="stat-value" id="stat-avg-score">—</div>
+            <div class="stat-desc">From complete records (Max 40)</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Score Range</span>
+              <span class="stat-icon" style="background:#f0f9ff; color:#0284c7;"></span>
+            </div>
+            <div class="stat-value" id="stat-score-range">—</div>
+            <div class="stat-desc">Lowest to Highest (out of 40)</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Incomplete Records</span>
+              <span class="stat-icon" style="background:#fef2f2; color:#dc2626;"></span>
+            </div>
+            <div class="stat-value" id="stat-incomplete-count">—</div>
+            <div class="stat-desc">Missing assessment components</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Support Needed</span>
+              <span class="stat-icon" style="background:#fffbeb; color:#d97706;"></span>
+            </div>
+            <div class="stat-value" id="stat-support-count">—</div>
+            <div class="stat-desc">Component or score alerts</div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Class Score Distribution</h2>
+                <div class="card-subtitle">Distribution of complete mid-semester totals out of 40</div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="chart-distribution"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Component-Wise Performance Comparison</h2>
+                <div class="card-subtitle">Class average percentage of maximum for each assessment component</div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="chart-components"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support Insights Section -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Evidence-Based Support Insights</h2>
+              <div class="card-subtitle">Traceable learning patterns to inform timely instructor advisory</div>
+            </div>
+          </div>
+          <div id="insights-preview-container">
+            <p>Loading insights...</p>
+          </div>
+        </div>
+
+        <!-- Student Records Overview Table -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Enrolled Students Overview</h2>
+              <div class="card-subtitle">Mid-semester breakdown (Midterm: 30, Assignment: 3, Presentation: 3, Attendance: 4)</div>
+            </div>
+            <div>
+              <a href="/static/pages/assessments.html" class="btn btn-primary btn-sm">Enter / Edit Marks →</a>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Student Name</th>
+                  <th>Midterm (30)</th>
+                  <th>Assignment (3)</th>
+                  <th>Presentation (3)</th>
+                  <th>Attendance (4)</th>
+                  <th>Total (40)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="student-table-body">
+                <tr><td colspan="8">Loading student records...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Dashboard.initTeacherDashboard();
+    });
+  </script>
+</body>
+</html>

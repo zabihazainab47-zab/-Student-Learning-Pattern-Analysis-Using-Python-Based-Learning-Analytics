@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Records — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">PA</div>
+        <div>
+          <div class="brand-title">Student Learning Pattern Analysis</div>
+          <div class="brand-sub">Educational Analytics</div>
+        </div>
+      </div>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div>
+          <div class="user-info-name" id="user-display-name">User</div>
+          <div class="user-info-role" id="user-role-label">ROLE</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/static/dashboards/teacher.html" class="nav-link">Dashboard</a>
+        <a href="/static/pages/students.html" class="nav-link active">Student Records</a>
+        <a href="/static/pages/assessments.html" class="nav-link">Marks Assessment</a>
+        <a href="/static/pages/insights.html" class="nav-link">Support Insights</a>
+        <a href="/static/pages/data-management.html" class="nav-link">Data & CSV Export</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="Auth.logout()">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Enrolled Student Directory</h1>
+        </div>
+        <div class="topbar-right">
+          <button id="btn-add-student-modal" class="btn btn-primary btn-sm" style="display:none;" onclick="Students.openModal()">
+            + Add New Student
+          </button>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <div class="card">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label for="filter-class" class="form-label" style="margin-bottom:0;">Class:</label>
+              <select id="filter-class" class="form-control" style="width:auto;"></select>
+            </div>
+            <div class="filter-group">
+              <input type="text" id="search-input" class="form-control" placeholder="Search by name or student ID..." style="width:260px;">
+              <span class="badge badge-info" id="student-count-badge">—</span>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Student Name</th>
+                  <th>Class & Section</th>
+                  <th>Session</th>
+                  <th>Profile</th>
+                  <th id="th-admin-actions" style="display:none;">Admin Action</th>
+                </tr>
+              </thead>
+              <tbody id="students-table-body">
+                <tr><td colspan="6">Loading students...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Student Modal -->
+  <div id="add-student-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:100;">
+    <div class="card" style="width:100%; max-width:440px; box-shadow:var(--shadow-lg);">
+      <div class="card-header">
+        <h3 class="card-title">Add Student Record</h3>
+        <button class="btn btn-outline btn-sm" onclick="Students.closeModal()"></button>
+      </div>
+      <form id="add-student-form">
+        <div class="form-group">
+          <label class="form-label" for="modal-student-id">Student ID / Roll No</label>
+          <input type="text" id="modal-student-id" class="form-control" placeholder="e.g. FA22-BIT-A-031" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modal-student-name">Full Name</label>
+          <input type="text" id="modal-student-name" class="form-control" placeholder="e.g. Danial Aslam" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modal-student-class">Class & Section</label>
+          <select id="modal-student-class" class="form-control" required></select>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button type="button" class="btn btn-outline" onclick="Students.closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/students.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Students.init();
+      const user = Api.getUser();
+      if (user && user.role === 'administrator') {
+        document.getElementById('th-admin-actions').style.display = 'table-cell';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Learning Pattern Analysis — IUB</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f7f5;--bg2:#ffffff;--bg3:#efefec;
+  --text:#1a1a18;--text2:#5a5a56;--text3:#9a9a94;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.15);
+  --green:#1D9E75;--green-l:#E1F5EE;--green-d:#0F6E56;
+  --blue:#2563EB;--blue-l:#EFF6FF;--blue-d:#1D4ED8;
+  --amber:#D97706;--amber-l:#FFFBEB;
+  --red:#DC2626;--red-l:#FEF2F2;
+  --purple:#7C3AED;--purple-l:#F5F3FF;
+  --pink:#DB2777;--pink-l:#FDF2F8;
+  --radius:8px;--radius-lg:12px;--shadow:0 1px 4px rgba(0,0,0,0.08);
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+
+/* LOGIN PAGE */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0fdf4 0%,#eff6ff 100%)}
+.login-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.10)}
+.login-logo{text-align:center;margin-bottom:1.75rem}
+.login-logo-icon{width:56px;height:56px;background:var(--green-l);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:26px;color:var(--green)}
+.login-title{font-size:20px;font-weight:700;color:var(--text)}
+.login-sub{font-size:12.5px;color:var(--text3);margin-top:2px}
+.form-group{margin-bottom:1rem}
+.form-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px;display:block}
+.form-input{width:100%;padding:9px 12px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:13.5px;outline:none;transition:border .15s}
+.form-input:focus{border-color:var(--green)}
+.form-select{width:100%;padding:9px 12px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:13.5px}
+.btn-login{width:100%;padding:10px;border-radius:var(--radius);border:none;background:var(--green);color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:.5rem}
+.btn-login:hover{background:var(--green-d)}
+.login-hint{background:var(--bg3);border-radius:var(--radius);padding:.75rem 1rem;margin-top:1.25rem;font-size:12px;color:var(--text2)}
+.login-hint b{color:var(--text);display:block;margin-bottom:4px}
+.login-err{background:var(--red-l);color:var(--red);border-radius:var(--radius);padding:.5rem .75rem;font-size:12.5px;margin-bottom:.75rem;display:none}
+
+/* APP LAYOUT */
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh;display:none}
+.sidebar{background:var(--bg2);border-right:0.5px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{display:flex;flex-direction:column;min-height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sb-brand{padding:1.25rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-brand-icon{width:36px;height:36px;background:var(--green-l);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--green);flex-shrink:0}
+.sb-brand-text{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.sb-brand-sub{font-size:10.5px;color:var(--text3)}
+.sb-user{padding:.875rem 1.25rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px}
+.sb-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
+.role-admin{background:var(--purple)}.role-teacher{background:var(--blue)}.role-student{background:var(--green)}
+.sb-user-name{font-size:12.5px;font-weight:500;color:var(--text)}
+.sb-user-role{font-size:11px;color:var(--text3);text-transform:capitalize}
+.sb-section{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;padding:.75rem 1.25rem .25rem}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 1.25rem;font-size:13px;color:var(--text2);cursor:pointer;border-right:2px solid transparent;transition:background .12s;user-select:none}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{color:var(--green-d);background:var(--green-l);font-weight:500;border-right-color:var(--green)}
+.nav-item i{font-size:16px;opacity:.7}
+.nav-item.active i{opacity:1}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;background:var(--red-l);color:var(--red)}
+.sb-footer{margin-top:auto;padding:.875rem 1.25rem;border-top:0.5px solid var(--border)}
+.btn-logout{width:100%;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-size:13px;cursor:pointer;transition:background .12s}
+.btn-logout:hover{background:var(--red-l);color:var(--red);border-color:var(--red)}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:0.5px solid var(--border);padding:.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar-title{font-size:15px;font-weight:600}
+.topbar-sub{font-size:11.5px;color:var(--text3);margin-top:1px}
+.status-pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--green-l);color:var(--green-d)}
+.sdot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* CONTENT */
+.content{flex:1;padding:1.5rem;display:flex;flex-direction:column;gap:1.25rem;overflow-y:auto}
+.section{display:none;flex-direction:column;gap:1.25rem}
+.section.active{display:flex}
+
+/* CARDS */
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.125rem 1.25rem;box-shadow:var(--shadow)}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.card-title{font-size:13.5px;font-weight:600;color:var(--text)}
+.card-sub{font-size:12px;color:var(--text3)}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.stat-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:.875rem 1rem;box-shadow:var(--shadow)}
+.stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:.5rem}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.stat-value{font-size:22px;font-weight:700;line-height:1;color:var(--text)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* CHART ROW */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.chart-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+
+/* TABLE */
+.filter-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.875rem}
+.filter-bar input,.filter-bar select{font-size:13px;padding:7px 10px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);outline:none}
+.filter-bar input{flex:1;min-width:200px}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--green)}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:0.5px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);background:var(--bg3);border-bottom:0.5px solid var(--border2)}
+td{padding:8px 12px;border-bottom:0.5px solid var(--border);color:var(--text2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+.clickable-row{cursor:pointer}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.badge-green{background:var(--green-l);color:var(--green-d)}
+.badge-blue{background:var(--blue-l);color:var(--blue-d)}
+.badge-amber{background:var(--amber-l);color:var(--amber)}
+.badge-red{background:var(--red-l);color:var(--red)}
+.badge-purple{background:var(--purple-l);color:var(--purple)}
+.badge-pink{background:var(--pink-l);color:var(--pink)}
+
+/* RISK FLAG */
+.risk-yes{color:var(--red);font-weight:600;font-size:11px}
+.risk-no{color:var(--green-d);font-size:11px}
+
+/* BUTTONS */
+button,.btn{cursor:pointer;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;color:var(--text);font-size:13px;padding:7px 14px;display:inline-flex;align-items:center;gap:5px;transition:background .12s;font-family:inherit}
+button:hover,.btn:hover{background:var(--bg3)}
+.btn-primary{background:var(--green);color:#fff;border-color:var(--green);font-weight:500}
+.btn-primary:hover{background:var(--green-d)}
+.btn-danger{background:var(--red-l);color:var(--red);border-color:var(--red)}
+.btn-blue{background:var(--blue-l);color:var(--blue-d);border-color:var(--blue)}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.875rem}
+.form-group-inline{display:flex;flex-direction:column;gap:4px}
+.form-group-inline label{font-size:11.5px;font-weight:500;color:var(--text2)}
+.form-group-inline input,.form-group-inline select{padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;outline:none}
+.form-group-inline input:focus,.form-group-inline select:focus{border-color:var(--green)}
+.form-section-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;padding-bottom:.375rem;border-bottom:0.5px solid var(--border)}
+
+/* PROFILE */
+.profile-header{display:flex;align-items:center;gap:1.25rem;padding:1.25rem;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+.profile-avatar{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;flex-shrink:0}
+.profile-name{font-size:18px;font-weight:700}
+.profile-roll{font-size:12.5px;color:var(--text3)}
+.profile-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.score-card{background:var(--bg3);border-radius:var(--radius);padding:.75rem 1rem;text-align:center}
+.score-val{font-size:22px;font-weight:700;line-height:1}
+.score-label{font-size:11px;color:var(--text3);margin-top:3px}
+.tips-list{display:flex;flex-direction:column;gap:.5rem}
+.tip-item{display:flex;gap:8px;align-items:flex-start;padding:.625rem .875rem;border-radius:var(--radius);background:var(--amber-l);border:0.5px solid #FCD34D;font-size:12.5px;color:#854D0E}
+.tip-item i{flex-shrink:0;font-size:15px;margin-top:1px}
+
+/* ALERTS */
+.alert{display:flex;gap:8px;align-items:flex-start;padding:.75rem 1rem;border-radius:var(--radius);font-size:13px}
+.alert-warn{background:var(--amber-l);color:#854D0E;border:0.5px solid #FCD34D}
+.alert-err{background:var(--red-l);color:var(--red);border:0.5px solid #FCA5A5}
+.alert-ok{background:var(--green-l);color:var(--green-d);border:0.5px solid #6EE7B7}
+.alert i{flex-shrink:0;font-size:16px;margin-top:1px}
+
+/* SPINNER */
+.spinner{width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PROGRESS BAR */
+.progress-bar{height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.18)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.modal-title{font-size:16px;font-weight:600}
+.modal-close{background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:2px}
+.modal-close:hover{color:var(--text)}
+
+/* PREDICT RESULT */
+.predict-result{background:var(--bg3);border-radius:var(--radius);padding:1rem;margin-top:.875rem}
+.predict-pattern{font-size:20px;font-weight:700;margin-bottom:3px}
+.predict-meta{font-size:12.5px;color:var(--text2);margin-bottom:.75rem}
+.proba-bars{display:flex;flex-direction:column;gap:.375rem}
+.proba-row{display:flex;align-items:center;gap:.5rem;font-size:12px}
+.proba-label{width:160px;flex-shrink:0;color:var(--text2)}
+.proba-bar{flex:1;height:8px;border-radius:4px;background:var(--bg);overflow:hidden}
+.proba-fill{height:100%;border-radius:4px;background:var(--green);transition:width .4s}
+.proba-pct{width:36px;text-align:right;color:var(--text3);flex-shrink:0}
+
+/* UPLOAD ZONE */
+.drop-zone{border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:2rem;text-align:center;color:var(--text2);transition:background .12s;cursor:pointer}
+.drop-zone:hover,.drop-zone.over{background:var(--green-l);border-color:var(--green)}
+</style>
+</head>
+<body>
+
+<!--  LOGIN PAGE  -->
+<div id="loginPage" class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon"><i class="ti ti-school"></i></div>
+      <div class="login-title">Student Learning Analytics</div>
+      <div class="login-sub">The Islamia University of Bahawalpur · Dept. of IT</div>
+    </div>
+    <div id="loginErr" class="login-err"><i class="ti ti-alert-circle"></i> <span id="loginErrMsg"></span></div>
+    <div class="form-group">
+      <label class="form-label">Username / Roll Number</label>
+      <input class="form-input" id="loginUser" type="text" placeholder="e.g. admin / teacher1 / F22BINFT1M01036" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <button class="btn-login" onclick="doLogin()" id="loginBtn">
+      <i class="ti ti-login"></i> Sign In
+    </button>
+    <div class="login-hint">
+      <b>Default credentials</b>
+      Admin: admin / admin123<br>
+      Teacher: teacher1 / teach123<br>
+      Student: Roll No / student123
+    </div>
+  </div>
+</div>
+
+<!--  MAIN APP  -->
+<div class="app" id="appLayout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-icon"><i class="ti ti-chart-bar"></i></div>
+      <div>
+        <div class="sb-brand-text">Learning Analytics</div>
+        <div class="sb-brand-sub">IUB · Dept. of IT · FYP</div>
+      </div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-avatar" id="sbAvatar">A</div>
+      <div>
+        <div class="sb-user-name" id="sbName">Loading…</div>
+        <div class="sb-user-role" id="sbRole">—</div>
+      </div>
+    </div>
+
+    <div class="sb-section">Main</div>
+    <div class="nav-item active" onclick="showSection('dashboard',this)" id="nav-dashboard">
+      <i class="ti ti-layout-dashboard"></i> Dashboard
+    </div>
+    <div class="nav-item" onclick="showSection('students',this)" id="nav-students">
+      <i class="ti ti-users"></i> Students
+      <span class="nav-badge" id="atRiskBadge" style="display:none">0</span>
+    </div>
+
+    <div class="sb-section" id="toolsSection">Tools</div>
+    <div class="nav-item" onclick="showSection('addStudent',this)" id="nav-addStudent">
+      <i class="ti ti-user-plus"></i> Add Student
+    </div>
+    <div class="nav-item" onclick="showSection('predict',this)" id="nav-predict">
+      <i class="ti ti-brain"></i> Predict Pattern
+    </div>
+    <div class="nav-item" onclick="showSection('upload',this)" id="nav-upload">
+      <i class="ti ti-upload"></i> Upload Data
+    </div>
+
+    <div class="sb-section" id="studentSection" style="display:none">My Profile</div>
+    <div class="nav-item" onclick="showSection('myProfile',this)" id="nav-myProfile" style="display:none">
+      <i class="ti ti-user-circle"></i> My Profile
+    </div>
+
+    <div class="sb-section" id="adminSection" style="display:none">Admin</div>
+    <div class="nav-item" onclick="showSection('manageUsers',this)" id="nav-manageUsers" style="display:none">
+      <i class="ti ti-settings"></i> Manage Users
+    </div>
+
+    <div class="sb-footer">
+      <button class="btn-logout" onclick="doLogout()">
+        <i class="ti ti-logout"></i> Sign Out
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-sub" id="topbarSub">Overview of student learning patterns</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button class="btn-blue" onclick="exportCSV()" id="exportBtn" style="display:none">
+          <i class="ti ti-download"></i> Export CSV
+        </button>
+        <div class="status-pill"><span class="sdot"></span> System Online</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!--  DASHBOARD  -->
+      <div class="section active" id="sec-dashboard">
+        <div class="stat-grid" id="statGrid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--blue-l);color:var(--blue)"><i class="ti ti-users"></i></div>
+            <div class="stat-label">Total Students</div>
+            <div class="stat-value" id="dTotalStudents">—</div>
+            <div class="stat-sub">enrolled</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--red-l);color:var(--red)"><i class="ti ti-alert-triangle"></i></div>
+            <div class="stat-label">At Risk</div>
+            <div class="stat-value" id="dAtRisk">—</div>
+            <div class="stat-sub">need intervention</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--green-l);color:var(--green)"><i class="ti ti-chart-line"></i></div>
+            <div class="stat-label">Average GPA</div>
+            <div class="stat-value" id="dAvgGpa">—</div>
+            <div class="stat-sub">out of 4.0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--amber-l);color:var(--amber)"><i class="ti ti-calendar-check"></i></div>
+            <div class="stat-label">Avg Attendance</div>
+            <div class="stat-value" id="dAvgAtt">—</div>
+            <div class="stat-sub">percent</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--purple-l);color:var(--purple)"><i class="ti ti-star"></i></div>
+            <div class="stat-label">Avg Engagement</div>
+            <div class="stat-value" id="dAvgEng">—</div>
+            <div class="stat-sub">out of 100</div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Pattern Distribution</span><span class="card-sub">all students</span></div>
+            <div style="position:relative;height:220px"><canvas id="chartPattern"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">GPA Trend by Semester</span><span class="card-sub">average GPA</span></div>
+            <div style="position:relative;height:220px"><canvas id="chartTrend"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"> At-Risk Students</span>
+            <span class="card-sub">immediate attention required</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Roll No</th><th>Name</th><th>GPA</th><th>Attendance</th><th>Total Marks</th><th>Pattern</th></tr></thead>
+              <tbody id="atRiskTable"><tr><td colspan="6" style="text-align:center;color:var(--text3);padding:1.5rem">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!--  STUDENTS  -->
+      <div class="section" id="sec-students">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Student Records</span>
+            <span class="card-sub" id="studentCount">loading…</span>
+          </div>
+          <div class="filter-bar">
+            <input type="text" id="searchInput" placeholder="Search name or roll number…" oninput="filterStudents()">
+            <select id="patternFilter" onchange="filterStudents()">
+              <option value="">All Patterns</option>
+              <option>Consistent Learner</option>
+              <option>Average Performer</option>
+              <option>Procrastinator</option>
+              <option>Struggling but Trying</option>
+              <option>High-Risk Student</option>
+            </select>
+            <select id="riskFilter" onchange="filterStudents()">
+              <option value="">All Students</option>
+              <option value="1">At Risk Only</option>
+              <option value="0">Not At Risk</option>
+            </select>
+            <select id="semFilter" onchange="filterStudents()">
+              <option value="">All Semesters</option>
+              <option>Fall 2022</option>
+              <option>Spring 2023</option>
+              <option>Fall 2023</option>
+              <option>Spring 2024</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Roll No</th><th>Name</th><th>GPA</th><th>Total</th><th>Attendance</th><th>Engagement</th><th>Pattern</th><th>At Risk</th></tr></thead>
+              <tbody id="studentsTable"></tbody>
+            </table>
+          </div>
+          <div id="studentsFooter" style="font-size:11.5px;color:var(--text3);padding:.5rem 0;margin-top:.5rem"></div>
+        </div>
+      </div>
+
+      <!--  ADD STUDENT  -->
+      <div class="section" id="sec-addStudent">
+        <div class="card" style="max-width:720px">
+          <div class="card-header"><span class="card-title">Add New Student</span><span class="card-sub">Pattern and GPA calculated automatically</span></div>
+          <div id="addStudentAlert"></div>
+          <div style="display:flex;flex-direction:column;gap:1.25rem;margin-top:.25rem">
+            <div>
+              <div class="form-section-title">Student Information</div>
+              <div class="form-grid">
+                <div class="form-group-inline">
+                  <label>Roll Number *</label>
+                  <input type="text" id="f_roll" placeholder="e.g. F23BINFT1M00101">
+                </div>
+                <div class="form-group-inline">
+                  <label>Full Name *</label>
+                  <input type="text" id="f_name" placeholder="e.g. AHMAD ALI">
+                </div>
+                <div class="form-group-inline">
+                  <label>Gender</label>
+                  <select id="f_gender"><option value="M">Male</option><option value="F">Female</option></select>
+                </div>
+                <div class="form-group-inline">
+                  <label>Semester</label>
+                  <select id="f_semester">
+                    <option>Fall 2022</option><option>Spring 2023</option>
+                    <option>Fall 2023</option><option selected>Spring 2024</option>
+                  </select>
+                </div>
+                <div class="form-group-inline">
+                  <label>Subject</label>
+                  <input type="text" id="f_subject" placeholder="e.g. Machine Learning">
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="form-section-title">Academic Marks</div>
+              <div class="form-grid-3">
+                <div class="form-group-inline">
+                  <label>Mid Marks (out of 30)</label>
+                  <input type="number" id="f_mid" min="0" max="30" step="0.5" placeholder="e.g. 25">
+                </div>
+                <div class="form-group-inline">
+                  <label>Assignment Score (out of 20)</label>
+                  <input type="number" id="f_assign" min="0" max="20" step="0.5" placeholder="e.g. 17">
+                </div>
+                <div class="form-group-inline">
+                  <label>Presentation Score (out of 10)</label>
+                  <input type="number" id="f_pres" min="0" max="10" step="0.5" placeholder="e.g. 8">
+                </div>
+                <div class="form-group-inline">
+                  <label>Final Marks (out of 40)</label>
+                  <input type="number" id="f_final" min="0" max="40" step="0.5" placeholder="e.g. 34">
+                </div>
+                <div class="form-group-inline">
+                  <label>Attendance %</label>
+                  <input type="number" id="f_att" min="0" max="100" step="1" placeholder="e.g. 85">
+                </div>
+                <div class="form-group-inline">
+                  <label>Weekly Study Hours</label>
+                  <input type="number" id="f_study" min="0" max="20" step="1" placeholder="e.g. 10">
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:.75rem;align-items:center">
+              <button class="btn-primary" onclick="submitAddStudent()" id="addStudentBtn">
+                <i class="ti ti-user-plus"></i> Add Student
+              </button>
+              <button onclick="clearAddForm()"><i class="ti ti-refresh"></i> Clear</button>
+            </div>
+          </div>
+        </div>
+        <!-- Result preview -->
+        <div class="card" id="addResultCard" style="display:none;max-width:720px">
+          <div class="card-header"><span class="card-title">Added Successfully</span></div>
+          <div id="addResultContent"></div>
+        </div>
+      </div>
+
+      <!--  PREDICT  -->
+      <div class="section" id="sec-predict">
+        <div class="card" style="max-width:700px">
+          <div class="card-header"><span class="card-title">Predict Student Pattern</span><span class="card-sub">Enter marks to get ML prediction without saving</span></div>
+          <div class="form-group-inline" style="margin-bottom:1rem">
+            <label>Select ML Model</label>
+            <select id="p_model" style="padding:.4rem .75rem;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg2);color:var(--text1);font-size:13px">
+              <option value="rf"> Random Forest</option>
+              <option value="dt"> Decision Tree</option>
+              <option value="knn"> KNN (K-Nearest Neighbors)</option>
+            </select>
+          </div>
+          <div class="form-grid-3" style="margin-bottom:1rem">
+            <div class="form-group-inline"><label>Mid Marks (/ 30)</label><input type="number" id="p_mid" min="0" max="30" step="0.5" placeholder="25"></div>
+            <div class="form-group-inline"><label>Assignment (/ 20)</label><input type="number" id="p_assign" min="0" max="20" step="0.5" placeholder="16"></div>
+            <div class="form-group-inline"><label>Presentation (/ 10)</label><input type="number" id="p_pres" min="0" max="10" step="0.5" placeholder="8"></div>
+            <div class="form-group-inline"><label>Final Marks (/ 40)</label><input type="number" id="p_final" min="0" max="40" step="0.5" placeholder="32"></div>
+            <div class="form-group-inline"><label>Attendance %</label><input type="number" id="p_att" min="0" max="100" placeholder="80"></div>
+            <div class="form-group-inline"><label>Study Hours/Week</label><input type="number" id="p_study" min="0" max="20" placeholder="8"></div>
+          </div>
+          <button class="btn-primary" onclick="runPredict()" id="predictBtn">
+            <i class="ti ti-brain"></i> Run Prediction
+          </button>
+          <div id="predictResult" style="display:none;margin-top:1rem"></div>
+        </div>
+      </div>
+
+      <!--  UPLOAD  -->
+      <div class="section" id="sec-upload">
+        <div class="card" style="max-width:600px">
+          <div class="card-header"><span class="card-title">Upload Student Dataset</span><span class="card-sub">CSV file with student records</span></div>
+          <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <i class="ti ti-file-spreadsheet" style="font-size:36px;display:block;margin:0 auto .5rem;color:var(--text3)"></i>
+            <div style="font-size:14px;margin-bottom:.375rem">Drag & drop CSV file here</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:.875rem">or click to browse</div>
+            <button class="btn-primary" onclick="event.stopPropagation(); document.getElementById('fileInput').click()"><i class="ti ti-upload"></i> Choose File</button>
+            <input type="file" id="fileInput" accept=".csv" style="display:none" onchange="uploadFile(this.files[0])">
+          </div>
+          <div id="uploadStatus" style="margin-top:.75rem"></div>
+          <div style="margin-top:1.25rem">
+            <div class="form-section-title">Required CSV columns</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.8;background:var(--bg3);padding:.75rem;border-radius:var(--radius);font-family:monospace">
+              Roll_No, Student_Name, Gender, Semester, Subject,<br>
+              Mid_Marks, Assignment_Score, Presentation_Score,<br>
+              Final_Marks, Total_Marks, GPA, Attendance_Percent,<br>
+              Weekly_Study_Hours, Engagement_Score, Pattern_Label, At_Risk
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--  MY PROFILE (student view)  -->
+      <div class="section" id="sec-myProfile">
+        <div id="profileContent"><div class="alert alert-warn"><i class="ti ti-loader"></i> Loading your profile…</div></div>
+      </div>
+
+      <!--  MANAGE USERS (admin)  -->
+      <div class="section" id="sec-manageUsers">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Manage Users</span><span class="card-sub">All system accounts</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Username</th><th>Full Name</th><th>Role</th><th>Roll No</th></tr></thead>
+              <tbody id="usersTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- STUDENT PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Student Profile</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+let TOKEN = '', USER_ROLE = '', USER_ROLL = '', USER_NAME = '';
+let allStudents = [], chartPattern = null, chartTrend = null;
+
+const PATTERN_COLORS = {
+  'Consistent Learner':  '#1D9E75',
+  'Average Performer':   '#2563EB',
+  'Procrastinator':      '#D97706',
+  'Struggling but Trying':'#7C3AED',
+  'High-Risk Student':   '#DC2626',
+};
+const PATTERN_BADGE = {
+  'Consistent Learner':  'badge-green',
+  'Average Performer':   'badge-blue',
+  'Procrastinator':      'badge-amber',
+  'Struggling but Trying':'badge-purple',
+  'High-Risk Student':   'badge-red',
+};
+
+/*  AUTH  */
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value.trim();
+  if (!username || !password) { showLoginErr('Enter username and password.'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.innerHTML = '<span class="spinner"></span> Signing in…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(API + '/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({username, password})
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Login failed');
+
+    TOKEN     = data.access_token;
+    USER_ROLE = data.role;
+    USER_ROLL = data.roll_no || '';
+    USER_NAME = data.full_name || username;
+
+    setupUI();
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appLayout').style.display = 'grid';
+    loadDashboard();
+
+  } catch (e) {
+    showLoginErr(e.message);
+  } finally {
+    btn.innerHTML = '<i class="ti ti-login"></i> Sign In';
+    btn.disabled = false;
+  }
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('loginErr');
+  document.getElementById('loginErrMsg').textContent = msg;
+  el.style.display = 'flex';
+}
+
+function doLogout() {
+  TOKEN = ''; USER_ROLE = '';
+  document.getElementById('appLayout').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginPass').value = '';
+}
+
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+/*  SETUP UI BY ROLE  */
+function setupUI() {
+  // Avatar
+  const av = document.getElementById('sbAvatar');
+  av.textContent = USER_NAME.charAt(0).toUpperCase();
+  av.className = 'sb-avatar role-' + USER_ROLE;
+  document.getElementById('sbName').textContent = USER_NAME;
+  document.getElementById('sbRole').textContent = USER_ROLE.charAt(0).toUpperCase() + USER_ROLE.slice(1);
+
+  if (USER_ROLE === 'student') {
+    // Hide teacher/admin tools
+    ['nav-addStudent','nav-predict','nav-upload','toolsSection'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('nav-myProfile').style.display = 'flex';
+    document.getElementById('studentSection').style.display = 'block';
+    document.getElementById('exportBtn').style.display = 'none';
+  } else {
+    document.getElementById('exportBtn').style.display = 'inline-flex';
+  }
+
+  if (USER_ROLE === 'admin') {
+    document.getElementById('adminSection').style.display = 'block';
+    document.getElementById('nav-manageUsers').style.display = 'flex';
+  }
+}
+
+/*  NAVIGATION  */
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+
+  const titles = {
+    dashboard: ['Dashboard', 'Overview of student learning patterns'],
+    students:  ['Students', 'Browse and filter all student records'],
+    addStudent:['Add Student', 'Register a new student — pattern assigned automatically'],
+    predict:   ['Predict Pattern', 'ML-based pattern prediction without saving'],
+    upload:    ['Upload Data', 'Import student records from CSV'],
+    myProfile: ['My Profile', 'Your academic performance overview'],
+    manageUsers:['Manage Users','All system accounts'],
+  };
+  const t = titles[id] || ['—','—'];
+  document.getElementById('topbarTitle').textContent = t[0];
+  document.getElementById('topbarSub').textContent   = t[1];
+
+  if (id === 'students')    loadStudents();
+  if (id === 'myProfile')   loadMyProfile();
+  if (id === 'manageUsers') loadUsers();
+}
+
+/*  FETCH HELPER  */
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: {
+      'Authorization': 'Bearer ' + TOKEN,
+      'Content-Type': 'application/json',
+      ...(opts.headers || {}),
+    }
+  });
+  if (res.status === 401) {
+    alert('Your session has expired. Please sign in again.');
+    doLogout();
+    return;
+  }
+  if (res.status === 403) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error('Access denied: ' + (err.detail || 'You do not have permission for this action.'));
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `API error ${res.status}`);
+  }
+  return res.json();
+}
+
+/*  DASHBOARD  */
+async function loadDashboard() {
+  try {
+    const data = await apiFetch('/dashboard');
+    document.getElementById('dTotalStudents').textContent = data.total_students?.toLocaleString() || '—';
+    document.getElementById('dAtRisk').textContent        = data.at_risk_count || '0';
+    document.getElementById('dAvgGpa').textContent        = data.avg_gpa || '—';
+    document.getElementById('dAvgAtt').textContent        = (data.avg_attendance || '—') + '%';
+    document.getElementById('dAvgEng').textContent        = data.avg_engagement || '—';
+
+    const badge = document.getElementById('atRiskBadge');
+    if (data.at_risk_count > 0) {
+      badge.textContent = data.at_risk_count;
+      badge.style.display = 'inline-block';
+    }
+
+    // Pattern chart
+    const patterns = data.pattern_distribution || {};
+    if (chartPattern) chartPattern.destroy();
+    chartPattern = new Chart(document.getElementById('chartPattern'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(patterns),
+        datasets: [{
+          data: Object.values(patterns),
+          backgroundColor: Object.keys(patterns).map(k => PATTERN_COLORS[k] || '#ccc'),
+          borderWidth: 2, borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: {size:11} } } }
+      }
+    });
+
+    // GPA trend
+    const trend = data.gpa_trend || [];
+    if (chartTrend) chartTrend.destroy();
+    chartTrend = new Chart(document.getElementById('chartTrend'), {
+      type: 'line',
+      data: {
+        labels: trend.map(t => t.semester),
+        datasets: [{
+          label: 'Avg GPA', data: trend.map(t => t.avg_gpa),
+          borderColor: '#2563EB', backgroundColor: 'rgba(37,99,235,0.07)',
+          pointBackgroundColor: '#2563EB', tension: 0.35, fill: true, pointRadius: 5
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { min: 0, max: 4, grid: { color:'rgba(0,0,0,0.04)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    // At-risk table
+    const atRisk = await apiFetch('/students?at_risk=1');
+    const tbody = document.getElementById('atRiskTable');
+    if (!atRisk.students?.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:1.5rem">No at-risk students found.</td></tr>';
+    } else {
+      tbody.innerHTML = atRisk.students.slice(0,10).map(s => `
+        <tr class="clickable-row" onclick="openProfile('${s.roll_no}')">
+          <td style="font-family:monospace;font-size:11px">${s.roll_no}</td>
+          <td><b>${s.student_name}</b></td>
+          <td><span style="color:${s.gpa<2?'var(--red)':'var(--text)'};font-weight:600">${s.gpa}</span></td>
+          <td>${s.attendance_percent}%</td>
+          <td>${s.total_marks}</td>
+          <td><span class="badge ${PATTERN_BADGE[s.pattern_label]||'badge-blue'}">${s.pattern_label}</span></td>
+        </tr>`).join('');
+    }
+  } catch(e) {
+    console.error('Dashboard error:', e);
+  }
+}
+
+/*  STUDENTS TABLE  */
+async function loadStudents() {
+  try {
+    const data = await apiFetch('/students');
+    allStudents = data.students || [];
+    renderStudentsTable(allStudents);
+  } catch(e) {
+    document.getElementById('studentsTable').innerHTML =
+      `<tr><td colspan="8" style="padding:1.5rem;text-align:center;color:var(--red)">${e.message}</td></tr>`;
+  }
+}
+
+function renderStudentsTable(students) {
+  document.getElementById('studentCount').textContent = students.length + ' students';
+  document.getElementById('studentsFooter').textContent = `Showing ${students.length} records`;
+  const tbody = document.getElementById('studentsTable');
+  if (!students.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--text3)">No students found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = students.map(s => `
+    <tr class="clickable-row" onclick="openProfile('${s.roll_no}')">
+      <td style="font-family:monospace;font-size:11px">${s.roll_no}</td>
+      <td><b>${s.student_name}</b></td>
+      <td><b style="color:${s.gpa>=3.5?'var(--green-d)':s.gpa<2?'var(--red)':'var(--text)'}">${s.gpa}</b></td>
+      <td>${s.total_marks}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${s.attendance_percent}%
+          <div class="progress-bar" style="width:50px"><div class="progress-fill" style="width:${s.attendance_percent}%;background:${s.attendance_percent>=75?'var(--green)':'var(--red)'}"></div></div>
+        </div>
+      </td>
+      <td>${s.engagement_score}</td>
+      <td><span class="badge ${PATTERN_BADGE[s.pattern_label]||'badge-blue'}">${s.pattern_label}</span></td>
+      <td><span class="${s.at_risk?'risk-yes':'risk-no'}">${s.at_risk?' Yes':' No'}</span></td>
+    </tr>`).join('');
+}
+
+function filterStudents() {
+  const q   = document.getElementById('searchInput').value.toLowerCase();
+  const pat = document.getElementById('patternFilter').value;
+  const risk = document.getElementById('riskFilter').value;
+  const sem  = document.getElementById('semFilter').value;
+  const filtered = allStudents.filter(s => {
+    const mQ   = !q   || s.student_name?.toLowerCase().includes(q) || s.roll_no?.toLowerCase().includes(q);
+    const mP   = !pat || s.pattern_label === pat;
+    const mR   = risk === '' || String(s.at_risk) === risk;
+    const mS   = !sem || s.semester === sem;
+    return mQ && mP && mR && mS;
+  });
+  renderStudentsTable(filtered);
+}
+
+/*  STUDENT PROFILE MODAL  */
+async function openProfile(rollNo) {
+  document.getElementById('profileModal').classList.add('open');
+  document.getElementById('modalContent').innerHTML = '<div class="alert alert-warn"><span class="spinner"></span> Loading…</div>';
+  try {
+    const s = await apiFetch('/students/' + rollNo);
+    renderProfileContent(s, 'modalContent');
+  } catch(e) {
+    document.getElementById('modalContent').innerHTML = `<div class="alert alert-err"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+  }
+}
+
+function closeModal() {
+  document.getElementById('profileModal').classList.remove('open');
+}
+
+function renderProfileContent(s, containerId) {
+  const initials = s.student_name?.split(' ').map(w=>w[0]).slice(0,2).join('') || '?';
+  const roleColor = s.gpa >= 3.5 ? 'var(--green)' : s.gpa < 2 ? 'var(--red)' : 'var(--blue)';
+
+  const tips = [];
+  if (s.attendance_percent < 75) tips.push('Attendance below 75% — needs improvement.');
+  if (s.weekly_study_hours < 6)  tips.push('Low study hours — recommend 8–10 hrs/week.');
+  if (s.assignment_score < 12)   tips.push('Assignment scores need improvement.');
+  if (s.presentation_score < 6)  tips.push('Presentation skills need development.');
+  if (s.at_risk)                 tips.push('Student is at risk — academic intervention required.');
+  if (!tips.length)              tips.push('Performing well — keep up consistent effort!');
+
+  document.getElementById(containerId).innerHTML = `
+    <div class="profile-header" style="margin-bottom:1rem">
+      <div class="profile-avatar" style="background:${roleColor}">${initials}</div>
+      <div style="flex:1">
+        <div class="profile-name">${s.student_name}</div>
+        <div class="profile-roll">${s.roll_no} · ${s.semester || ''} · ${s.subject || ''}</div>
+        <div class="profile-badges">
+          <span class="badge ${PATTERN_BADGE[s.pattern_label]||'badge-blue'}">${s.pattern_label}</span>
+          <span class="badge ${s.at_risk?'badge-red':'badge-green'}">${s.at_risk?' At Risk':' Safe'}</span>
+          <span class="badge badge-blue">GPA ${s.gpa}</span>
+        </div>
+      </div>
+    </div>
+    <div class="score-grid" style="margin-bottom:1rem">
+      <div class="score-card">
+        <div class="score-val" style="color:${s.gpa>=3.5?'var(--green-d)':s.gpa<2?'var(--red)':'var(--blue)'}">${s.gpa}</div>
+        <div class="score-label">GPA / 4.0</div>
+      </div>
+      <div class="score-card">
+        <div class="score-val">${s.total_marks}</div>
+        <div class="score-label">Total / 100</div>
+      </div>
+      <div class="score-card">
+        <div class="score-val" style="color:${s.attendance_percent>=75?'var(--green-d)':'var(--red)'}">${s.attendance_percent}%</div>
+        <div class="score-label">Attendance</div>
+      </div>
+      <div class="score-card">
+        <div class="score-val">${s.engagement_score}</div>
+        <div class="score-label">Engagement / 100</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:1rem;font-size:12.5px">
+      ${[['Mid Marks',s.mid_marks,'/ 30'],['Assignment',s.assignment_score,'/ 20'],['Presentation',s.presentation_score,'/ 10'],['Final',s.final_marks,'/ 40']].map(([l,v,m])=>`
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:.625rem .75rem">
+        <div style="color:var(--text3);font-size:11px;margin-bottom:2px">${l}</div>
+        <div style="font-size:16px;font-weight:600">${v} <span style="font-size:11px;color:var(--text3)">${m}</span></div>
+      </div>`).join('')}
+    </div>
+    <div style="margin-bottom:.5rem;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Improvement Tips</div>
+    <div class="tips-list">${tips.map(t=>`<div class="tip-item"><i class="ti ti-bulb"></i>${t}</div>`).join('')}</div>
+  `;
+}
+
+/*  MY PROFILE (student)  */
+async function loadMyProfile() {
+  if (!USER_ROLL) {
+    document.getElementById('profileContent').innerHTML =
+      '<div class="alert alert-err"><i class="ti ti-alert-circle"></i> No student profile linked to your account.</div>';
+    return;
+  }
+  try {
+    const s = await apiFetch('/students/' + USER_ROLL);
+    const div = document.getElementById('profileContent');
+    div.innerHTML = '';
+    const card = document.createElement('div');
+    card.className = 'card';
+    renderProfileContent(s, 'profileContent');
+  } catch(e) {
+    document.getElementById('profileContent').innerHTML =
+      `<div class="alert alert-err"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+  }
+}
+
+/*  ADD STUDENT  */
+async function submitAddStudent() {
+  const roll    = document.getElementById('f_roll').value.trim();
+  const name    = document.getElementById('f_name').value.trim();
+  const mid     = parseFloat(document.getElementById('f_mid').value);
+  const assign  = parseFloat(document.getElementById('f_assign').value);
+  const pres    = parseFloat(document.getElementById('f_pres').value);
+  const final   = parseFloat(document.getElementById('f_final').value);
+  const att     = parseFloat(document.getElementById('f_att').value);
+  const study   = parseInt(document.getElementById('f_study').value);
+
+  if (!roll || !name) { showAddAlert('err', 'Roll number and name are required.'); return; }
+  if ([mid,assign,pres,final,att,study].some(isNaN)) { showAddAlert('err', 'Please fill all mark fields.'); return; }
+
+  const btn = document.getElementById('addStudentBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Adding…';
+
+  try {
+    const res = await apiFetch('/students/add', {
+      method: 'POST',
+      body: JSON.stringify({
+        roll_no: roll, student_name: name,
+        gender: document.getElementById('f_gender').value,
+        semester: document.getElementById('f_semester').value,
+        subject: document.getElementById('f_subject').value,
+        mid_marks: mid, assignment_score: assign,
+        presentation_score: pres, final_marks: final,
+        attendance_percent: att, weekly_study_hours: study,
+      })
+    });
+
+    showAddAlert('ok', `Student "${name}" added successfully!`);
+
+    const rc = document.getElementById('addResultCard');
+    const color = PATTERN_COLORS[res.pattern] || 'var(--blue)';
+    document.getElementById('addResultContent').innerHTML = `
+      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+        <div class="score-card" style="flex:1;text-align:center">
+          <div class="score-val" style="color:${color}">${res.pattern}</div>
+          <div class="score-label">Assigned Pattern</div>
+        </div>
+        <div class="score-card" style="flex:1;text-align:center">
+          <div class="score-val">${res.gpa}</div>
+          <div class="score-label">Calculated GPA</div>
+        </div>
+        <div class="score-card" style="flex:1;text-align:center">
+          <div class="score-val" style="color:${res.at_risk?'var(--red)':'var(--green-d)'}">${res.at_risk?'At Risk':'Safe'}</div>
+          <div class="score-label">Risk Status</div>
+        </div>
+      </div>`;
+    rc.style.display = 'block';
+
+  } catch(e) {
+    showAddAlert('err', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-user-plus"></i> Add Student';
+  }
+}
+
+function showAddAlert(type, msg) {
+  const el = document.getElementById('addStudentAlert');
+  const cls = type === 'ok' ? 'alert-ok' : 'alert-err';
+  const icon = type === 'ok' ? 'ti-check' : 'ti-alert-circle';
+  el.innerHTML = `<div class="alert ${cls}" style="margin-bottom:.75rem"><i class="ti ${icon}"></i>${msg}</div>`;
+}
+
+function clearAddForm() {
+  ['f_roll','f_name','f_mid','f_assign','f_pres','f_final','f_att','f_study','f_subject'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('addStudentAlert').innerHTML = '';
+  document.getElementById('addResultCard').style.display = 'none';
+}
+
+/*  PREDICT  */
+async function runPredict() {
+  const mid    = parseFloat(document.getElementById('p_mid').value);
+  const assign = parseFloat(document.getElementById('p_assign').value);
+  const pres   = parseFloat(document.getElementById('p_pres').value);
+  const final  = parseFloat(document.getElementById('p_final').value);
+  const att    = parseFloat(document.getElementById('p_att').value);
+  const study  = parseInt(document.getElementById('p_study').value);
+
+  if ([mid,assign,pres,final,att,study].some(isNaN)) {
+    alert('Please fill all fields.'); return;
+  }
+
+  const btn = document.getElementById('predictBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Predicting…';
+
+  try {
+    const res = await apiFetch('/predict', {
+      method: 'POST',
+      body: JSON.stringify({
+        mid_marks: mid, assignment_score: assign, presentation_score: pres,
+        final_marks: final, attendance_percent: att, weekly_study_hours: study,
+        model: document.getElementById('p_model').value
+      })
+    });
+
+    const modelNames = { rf: 'Random Forest', dt: 'Decision Tree', knn: 'KNN' };
+    const usedModel  = modelNames[document.getElementById('p_model').value] || 'ML Model';
+    const color = PATTERN_COLORS[res.pattern_label] || 'var(--blue)';
+    const probs = res.all_probabilities || {};
+
+    document.getElementById('predictResult').innerHTML = `
+      <div class="predict-result">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:.4rem;font-weight:600">MODEL: ${usedModel}</div>
+        <div class="predict-pattern" style="color:${color}">${res.pattern_label}</div>
+        <div class="predict-meta">Confidence: ${res.confidence}% · GPA: ${res.gpa} · Total: ${res.total_marks}/100 · Engagement: ${res.engagement_score}</div>
+        <div style="margin-bottom:.75rem">
+          <span class="badge ${res.at_risk?'badge-red':'badge-green'}">${res.at_risk?' At Risk':' Not At Risk'}</span>
+        </div>
+        ${Object.keys(probs).length ? `
+        <div style="font-size:11.5px;font-weight:600;color:var(--text3);margin-bottom:.5rem">All class probabilities</div>
+        <div class="proba-bars">
+          ${Object.entries(probs).sort((a,b)=>b[1]-a[1]).map(([cls,pct])=>`
+          <div class="proba-row">
+            <div class="proba-label">${cls}</div>
+            <div class="proba-bar"><div class="proba-fill" style="width:${pct}%;background:${PATTERN_COLORS[cls]||'var(--green)'}"></div></div>
+            <div class="proba-pct">${pct}%</div>
+          </div>`).join('')}
+        </div>` : ''}
+        ${res.improvement_tips?.length ? `
+        <div style="margin-top:.875rem">
+          <div class="form-section-title" style="margin-bottom:.5rem">Recommendations</div>
+          <div class="tips-list">${res.improvement_tips.map(t=>`<div class="tip-item"><i class="ti ti-bulb"></i>${t}</div>`).join('')}</div>
+        </div>` : ''}
+      </div>`;
+    document.getElementById('predictResult').style.display = 'block';
+
+  } catch(e) {
+    document.getElementById('predictResult').innerHTML =
+      `<div class="alert alert-err"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+    document.getElementById('predictResult').style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-brain"></i> Run Prediction';
+  }
+}
+
+/*  EXPORT CSV  */
+async function exportCSV() {
+  try {
+    const res = await fetch(API + '/export/csv', {
+      headers: { 'Authorization': 'Bearer ' + TOKEN }
+    });
+    if (!res.ok) throw new Error('Export failed');
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `students_export_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    alert('Export failed: ' + e.message);
+  }
+}
+
+/*  UPLOAD  */
+async function uploadFile(file) {
+  if (!file) return;
+  const st = document.getElementById('uploadStatus');
+  st.innerHTML = `<div class="alert alert-warn"><span class="spinner"></span> Uploading ${file.name}…</div>`;
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const res = await fetch(API + '/upload', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + TOKEN },
+      body: form
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail);
+    st.innerHTML = `<div class="alert alert-ok"><i class="ti ti-check"></i> ${data.message}</div>`;
+    setTimeout(() => loadDashboard(), 1000);
+  } catch(e) {
+    st.innerHTML = `<div class="alert alert-err"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+  }
+}
+
+// Drag and drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  uploadFile(e.dataTransfer.files[0]);
+});
+
+/*  MANAGE USERS  */
+async function loadUsers() {
+  try {
+    const data = await apiFetch('/users');
+    const ROLE_BADGE = { admin:'badge-purple', teacher:'badge-blue', student:'badge-green' };
+    document.getElementById('usersTable').innerHTML = data.users.map((u,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td style="font-family:monospace;font-size:12px">${u.username}</td>
+        <td>${u.full_name || '—'}</td>
+        <td><span class="badge ${ROLE_BADGE[u.role]||'badge-blue'}">${u.role}</span></td>
+        <td style="font-family:monospace;font-size:11px">${u.roll_no || '—'}</td>
+      </tr>`).join('');
+  } catch(e) {
+    document.getElementById('usersTable').innerHTML =
+      `<tr><td colspan="5" style="text-align:center;color:var(--red);padding:1.5rem">${e.message}</td></tr>`;
+  }
+}
+
+/*  CLOSE MODAL ON OVERLAY CLICK  */
+document.getElementById('profileModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>

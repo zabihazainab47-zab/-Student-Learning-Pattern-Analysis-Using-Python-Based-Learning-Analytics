@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrator Dashboard — Student Learning Pattern Analysis</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Admin Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon" style="background:#f5f3ff; color:#7c3aed;">PA</div>
+        <div>
+          <div class="brand-title">Student Learning Pattern Analysis</div>
+          <div class="brand-sub">Administration Console</div>
+        </div>
+      </div>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar" style="background-color: #7c3aed;">A</div>
+        <div>
+          <div class="user-info-name" id="user-display-name">Administrator</div>
+          <div class="user-info-role" id="user-role-label">ADMINISTRATOR</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/static/dashboards/admin.html" class="nav-link active">System Overview</a>
+        <a href="/static/pages/students.html" class="nav-link">Student Records</a>
+        <a href="/static/pages/classes.html" class="nav-link">Class & Section Setup</a>
+        <a href="/static/pages/assessments.html" class="nav-link">Academic Assessments</a>
+        <a href="/static/pages/insights.html" class="nav-link">Support Insights</a>
+        <a href="/static/pages/data-management.html" class="nav-link">CSV Import / Export</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="Auth.logout()">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">System Administration & Role Management</h1>
+        </div>
+        <div class="topbar-right">
+          <a href="/static/dashboards/teacher.html" class="btn btn-outline btn-sm">Switch to Teacher View</a>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- Metric Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Active Classes</span>
+              <span class="stat-icon" style="background:#eff6ff; color:#1e3a8a;"></span>
+            </div>
+            <div class="stat-value" id="admin-total-classes">—</div>
+            <div class="stat-desc">Sections in 2025-2026 session</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Instructors</span>
+              <span class="stat-icon" style="background:#ecfdf5; color:#059669;">‍</span>
+            </div>
+            <div class="stat-value" id="admin-total-teachers">—</div>
+            <div class="stat-desc">Registered teacher accounts</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Enrolled Students</span>
+              <span class="stat-icon" style="background:#f0f9ff; color:#0284c7;"></span>
+            </div>
+            <div class="stat-value" id="admin-total-students">—</div>
+            <div class="stat-desc">Student records in database</div>
+          </div>
+        </div>
+
+        <!-- Teacher Accounts & Class Assignments -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Teacher Accounts & Class Assignments</h2>
+              <div class="card-subtitle">Manage instructor logins and class-level permissions</div>
+            </div>
+            <div>
+              <button class="btn btn-primary btn-sm" onclick="openCreateTeacherModal()">+ Add Instructor Account</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Teacher Name</th>
+                  <th>Username</th>
+                  <th>Assigned Classes</th>
+                  <th>Total Enrolled</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="teachers-table-body">
+                <tr><td colspan="5">Loading instructors...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Teacher Modal -->
+  <div id="create-teacher-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:100;">
+    <div class="card" style="width: 100%; max-width: 480px; box-shadow: var(--shadow-lg);">
+      <div class="card-header">
+        <h3 class="card-title">Add Instructor Account</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeCreateTeacherModal()"></button>
+      </div>
+      <form id="create-teacher-form">
+        <div class="form-group">
+          <label class="form-label" for="t-name">Full Name</label>
+          <input type="text" id="t-name" class="form-control" placeholder="e.g. Dr. Ayesha Siddiqui" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="t-user">Username</label>
+          <input type="text" id="t-user" class="form-control" placeholder="e.g. teacher3" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="t-pass">Password</label>
+          <input type="password" id="t-pass" class="form-control" placeholder="••••••••" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign Initial Classes</label>
+          <div id="t-classes-checkboxes" style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"></div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button type="button" class="btn btn-outline" onclick="closeCreateTeacherModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = Auth.checkAuth(['administrator']);
+      if (!user) return;
+
+      await loadAdminDashboard();
+    });
+
+    async function loadAdminDashboard() {
+      try {
+        const [classes, teachers, students] = await Promise.all([
+          Api.get('/api/classes'),
+          Api.get('/api/teachers'),
+          Api.get('/api/students'),
+        ]);
+
+        document.getElementById('admin-total-classes').textContent = classes.length;
+        document.getElementById('admin-total-teachers').textContent = teachers.length;
+        document.getElementById('admin-total-students').textContent = students.length;
+
+        renderTeachersTable(teachers);
+        populateClassCheckboxes(classes);
+      } catch (err) {
+        console.error('Failed to load admin dashboard:', err);
+      }
+    }
+
+    function renderTeachersTable(teachers) {
+      const tbody = document.getElementById('teachers-table-body');
+      if (teachers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5">No instructors registered yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = teachers.map(t => {
+        const assignedNames = t.assigned_classes.map(c => `${c.class_name} ${c.section}`).join(', ') || '<em>No classes assigned</em>';
+        const totalStudents = t.assigned_classes.reduce((sum, c) => sum + (c.student_count || 0), 0);
+        return `
+          <tr>
+            <td><strong>${t.teacher_name}</strong></td>
+            <td><code>${t.username}</code></td>
+            <td>${assignedNames}</td>
+            <td>${totalStudents}</td>
+            <td>
+              <span class="badge badge-success">Active</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function populateClassCheckboxes(classes) {
+      const box = document.getElementById('t-classes-checkboxes');
+      box.innerHTML = classes.map(c => `
+        <label style="font-size:13px; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="assign_class" value="${c.id}">
+          ${c.class_name} - ${c.section} (${c.academic_session})
+        </label>
+      `).join('');
+    }
+
+    function openCreateTeacherModal() {
+      document.getElementById('create-teacher-modal').style.display = 'flex';
+    }
+    function closeCreateTeacherModal() {
+      document.getElementById('create-teacher-modal').style.display = 'none';
+      document.getElementById('create-teacher-form').reset();
+    }
+
+    document.getElementById('create-teacher-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('t-name').value.trim();
+      const user = document.getElementById('t-user').value.trim();
+      const pass = document.getElementById('t-pass').value.trim();
+      const checkedBoxes = Array.from(document.querySelectorAll('input[name="assign_class"]:checked')).map(cb => parseInt(cb.value, 10));
+
+      try {
+        await Api.post('/api/teachers', {
+          teacher_name: name,
+          username: user,
+          password: pass,
+          assigned_class_ids: checkedBoxes,
+        });
+        Api.showToast(`Instructor account '${name}' created.`, 'success');
+        closeCreateTeacherModal();
+        await loadAdminDashboard();
+      } catch (err) {
+        // Error toast shown by Api
+      }
+    });
+  </script>
+</body>
+</html>

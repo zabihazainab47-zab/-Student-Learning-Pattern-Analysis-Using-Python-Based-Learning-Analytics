@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database files — do NOT commit live DB (run scripts/create_demo_data.py to seed)
+*.db
+*.sqlite3
+
+# Trained ML model binaries — regenerate with ml/train.py
+*.pkl
+
+# Environment secrets — copy from .env.example and fill in
+.env
+
+# Virtual environments
+.venv
+env/
+venv/
+ENV/
+
+# OS / Editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Original project backup — not needed in public repo
+backup_original_project/
+
+# Temp outputs
+outputs/
+scripts/__pycache__/
